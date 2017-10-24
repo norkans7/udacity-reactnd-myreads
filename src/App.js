@@ -14,18 +14,63 @@ class BooksApp extends React.Component {
      */
     showSearchPage: false,
     books: [],
-    searchedBooks: []
+    searchedBooks: [],
+    query: ''
+  }
+
+  updateQuery = (query) => {
+    this.setState({ query: query })
+
+    console.log(query.trim())
+    BooksAPI.search(query.trim(), 20).then((books) => {
+      console.log(books)
+      this.setState({searchedBooks: books.filter((b) => b.shelf === undefined || b.shelf === 'none')})
+    }).catch(() => {this.setState({searchedBooks: []})})
+
+  }
+
+  clearQuery = () => {
+    this.setState({ query: '' })
+    this.setState({searchedBooks: []})
+
+
   }
 
   componentDidMount() {
     BooksAPI.getAll().then((books) => {
-      this.setState({ books: books, searchedBooks: books })
+      this.setState({ books: books })
     })
+
 
   }
 
+  moveBook = (book, shelf) => {
+    let books = this.state.books.filter((b) => b.id !== book.id)
+    if (shelf !== 'none') {
+      book.shelf = shelf
+      this.setState({books: books.concat([book])})
+    } else {
+      this.setState({ books })
+    }
+
+    BooksAPI.update(book, shelf)
+
+  }
+
+  addBook = (book, shelf) => {
+    this.moveBook(book, shelf)
+    this.setState({searchedBooks: this.state.searchedBooks.filter((b) => b.id !== book.id )})
+  }
 
   render() {
+    const bookshelves = [
+      { slug: "currentlyReading", title: "Currently Reading", books: this.state.books.filter((b) => b.shelf === 'currentlyReading')},
+      { slug: "wantToRead", title: "Want To Read", books: this.state.books.filter((b) => b.shelf === 'wantToRead')},
+      { slug: "read", title: "Read", books: this.state.books.filter((b) => b.shelf === 'read')}
+    ]
+
+    const { query } = this.state
+
     return (
       <div className="app">
         {this.state.showSearchPage ? (
@@ -41,14 +86,19 @@ class BooksApp extends React.Component {
                   However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                   you don't find a specific author or title. Every search is limited by search terms.
                 */}
-                <input type="text" placeholder="Search by title or author" />
+                <input
+                  type="text"
+                  placeholder="Search by title or author"
+                  value={query}
+                  onChange={(event) => this.updateQuery(event.target.value)}
+                />
 
               </div>
             </div>
             <div className="search-books-results">
               <ol className="books-grid">
                 {this.state.searchedBooks.map((book) => (
-                  <Book key={book.id} book={book} />
+                  <Book key={book.id} book={book} moveBook={this.addBook}  />
                 ))}
               </ol>
             </div>
@@ -60,13 +110,13 @@ class BooksApp extends React.Component {
               </div>
               <div className="list-books-content">
                 <div>
-                 <Bookshelf bookshelf='currentlyReading' books={this.state.books} />
-                 <Bookshelf bookshelf='wantToRead' books={this.state.books} />
-                 <Bookshelf bookshelf='read' books={this.state.books} />
+                  {bookshelves.map(bookshelf => (
+                    <Bookshelf key={bookshelf.slug} bookshelf={bookshelf} books={this.state.books} moveBook={this.moveBook}/>
+                  ))}
                 </div>
               </div>
               <div className="open-search">
-                <a onClick={() => this.setState({ showSearchPage: true })}>Add a book</a>
+                <a onClick={() => {this.setState({ showSearchPage: true }); this.clearQuery()}}>Add a book</a>
               </div>
             </div>
           )}
