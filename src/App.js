@@ -32,21 +32,13 @@ class BooksApp extends React.Component {
   }
 
   moveBook = (book, shelf) => {
-    let books = this.state.books.filter((b) => b.id !== book.id)
-    if (shelf !== 'none') {
+    BooksAPI.update(book, shelf).then(() => {
       book.shelf = shelf
-      this.setState({books: books.concat([book])})
-    } else {
-      this.setState({ books })
-    }
-
-    BooksAPI.update(book, shelf)
-
-  }
-
-  addBook = (book, shelf) => {
-    this.moveBook(book, shelf)
-    this.setState({searchedBooks: this.state.searchedBooks.filter((b) => b.id !== book.id )})
+      this.setState(prevState => ({
+        books: prevState.books.filter(b => b.id !== book.id).concat([book]),
+        searchedBooks: prevState.searchedBooks.filter(b => b.id !== book.id)
+      }))
+    })
   }
 
   render() {
@@ -96,7 +88,7 @@ class BooksApp extends React.Component {
             <div className="search-books-results">
               <ol className="books-grid">
                 {this.state.searchedBooks.map((book) => (
-                  <Book key={book.id} book={book} moveBook={this.addBook} />
+                  <Book key={book.id} book={book} moveBook={this.moveBook} />
                 ))}
               </ol>
             </div>
