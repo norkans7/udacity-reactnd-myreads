@@ -1,7 +1,6 @@
 import React from 'react'
-import { Link, Route } from 'react-router-dom'
+import { Switch, Route } from 'react-router-dom'
 import ListBooks from './ListBooks'
-import Book from './Book'
 import SearchBooks from './SearchBooks'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
@@ -56,6 +55,7 @@ render() {
 
   return (
     <div className="app">
+      <Switch>
       <Route path='/search' render={() => (
         <SearchBooks
           query={query}
@@ -67,6 +67,10 @@ render() {
       <Route exact path='/' render={() => (
         <ListBooks books={this.state.books} onMoveBook={this.moveBook} />
       )} />
+      <Route render={() => (
+        <img src='http://via.placeholder.com/1280x800?text=404%20Not%20Found' />
+      )} />
+      </Switch>
     </div>
   )
 }
