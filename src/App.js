@@ -105,7 +105,6 @@ class BooksApp extends React.Component {
                   <Bookshelf
                     key={bookshelf.slug}
                     bookshelf={bookshelf}
-                    books={this.state.books}
                     moveBook={this.moveBook}
                   />
                 ))}
