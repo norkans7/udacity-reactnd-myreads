@@ -68,7 +68,7 @@ render() {
         <ListBooks books={this.state.books} onMoveBook={this.moveBook} />
       )} />
       <Route render={() => (
-        <img src='http://via.placeholder.com/1280x800?text=404%20Not%20Found' />
+        <img alt="Not found" src='http://via.placeholder.com/1280x800?text=404%20Not%20Found' />
       )} />
       </Switch>
     </div>
